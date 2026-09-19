@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@color/background">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Shopping List"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="@color/text_dark"
+        android:gravity="center"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="6dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Things I need to buy"
+        android:textSize="15sp"
+        android:textColor="@color/text_grey"
+        android:gravity="center"
+        android:layout_marginBottom="25dp" />
+
+    <EditText
+        android:id="@+id/editShoppingItem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Add an item"
+        android:inputType="textCapWords"
+        android:textColor="@color/text_dark"
+        android:textColorHint="@color/text_grey"
+        android:padding="14dp"
+        android:layout_marginBottom="12dp" />
+
+    <Button
+        android:id="@+id/buttonAddShoppingItem"
+        android:layout_width="match_parent"
+        android:layout_height="54dp"
+        android:text="Add to List"
+        android:textSize="16sp"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:backgroundTint="@color/primary_green"
+        android:layout_marginBottom="25dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Items to buy"
+        android:textSize="19sp"
+        android:textStyle="bold"
+        android:textColor="@color/text_dark"
+        android:layout_marginBottom="12dp" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:id="@+id/shoppingListContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+    </ScrollView>
+
+    <Button
+        android:id="@+id/buttonBack"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:text="Back"
+        android:textSize="16sp"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:backgroundTint="@color/text_grey" />
+
+</LinearLayout>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Add Pantry Item"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_dark"
+            android:gravity="center"
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="6dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Enter the item details below"
+            android:textSize="15sp"
+            android:textColor="@color/text_grey"
+            android:gravity="center"
+            android:layout_marginBottom="30dp" />
+
+        <EditText
+            android:id="@+id/editItemName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Item name"
+            android:inputType="textCapWords"
+            android:textColor="@color/text_dark"
+            android:textColorHint="@color/text_grey"
+            android:padding="14dp"
+            android:layout_marginBottom="12dp" />
+
+        <EditText
+            android:id="@+id/editQuantity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Quantity"
+            android:inputType="number"
+            android:textColor="@color/text_dark"
+            android:textColorHint="@color/text_grey"
+            android:padding="14dp"
+            android:layout_marginBottom="12dp" />
+
+        <EditText
+            android:id="@+id/editCategory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Category"
+            android:inputType="textCapWords"
+            android:textColor="@color/text_dark"
+            android:textColorHint="@color/text_grey"
+            android:padding="14dp"
+            android:layout_marginBottom="12dp" />
+
+        <EditText
+            android:id="@+id/editExpiryDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Expiry date (DD/MM/YYYY)"
+            android:inputType="date"
+            android:textColor="@color/text_dark"
+            android:textColorHint="@color/text_grey"
+            android:padding="14dp"
+            android:layout_marginBottom="26dp" />
+
+        <Button
+            android:id="@+id/buttonSaveItem"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Save Item"
+            android:textSize="16sp"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/primary_green"
+            android:layout_marginBottom="12dp" />
+
+        <Button
+            android:id="@+id/buttonCancel"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="Cancel"
+            android:textSize="16sp"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/text_grey" />
+
+    </LinearLayout>
+
+</ScrollView>
