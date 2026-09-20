@@ -101,7 +101,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             addRecipes(db);
         }
 
-        if (oldVersion < 3) {
+        if (oldVersion == 2) {
 
             db.execSQL(
                     "ALTER TABLE " +
@@ -145,7 +145,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 new String[]{"Bread"}
         );
 
-
         values.clear();
 
         values.put(INGREDIENT_UNIT, "g");
@@ -158,7 +157,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 new String[]{"Chicken"}
         );
 
-
         values.clear();
 
         values.put(INGREDIENT_UNIT, "g");
@@ -170,7 +168,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 INGREDIENT_NAME + " = ?",
                 new String[]{"Cheese"}
         );
-
 
         values.clear();
 
@@ -358,7 +355,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 db, recipeId, "Cheese", 100, "g"
         );
 
-
         recipeId = addRecipe(
                 db,
                 "Cheese Toast",
@@ -373,7 +369,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 db, recipeId, "Cheese", 100, "g"
         );
 
-
         recipeId = addRecipe(
                 db,
                 "Scrambled Eggs",
@@ -383,7 +378,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         addRecipeIngredient(
                 db, recipeId, "Eggs", 2, "pieces"
         );
-
 
         recipeId = addRecipe(
                 db,
@@ -399,7 +393,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 db, recipeId, "Bread", 2, "pieces"
         );
 
-
         recipeId = addRecipe(
                 db,
                 "Chicken Sandwich",
@@ -413,7 +406,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         addRecipeIngredient(
                 db, recipeId, "Bread", 2, "pieces"
         );
-
 
         recipeId = addRecipe(
                 db,
@@ -429,7 +421,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 db, recipeId, "Rice", 100, "g"
         );
 
-
         recipeId = addRecipe(
                 db,
                 "Egg Fried Rice",
@@ -443,7 +434,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         addRecipeIngredient(
                 db, recipeId, "Eggs", 2, "pieces"
         );
-
 
         recipeId = addRecipe(
                 db,
@@ -459,7 +449,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 db, recipeId, "Cheese", 100, "g"
         );
 
-
         recipeId = addRecipe(
                 db,
                 "Chicken Omelette",
@@ -473,7 +462,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         addRecipeIngredient(
                 db, recipeId, "Eggs", 2, "pieces"
         );
-
 
         recipeId = addRecipe(
                 db,
@@ -493,7 +481,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 db, recipeId, "Bread", 2, "pieces"
         );
 
-
         recipeId = addRecipe(
                 db,
                 "Cheese Sandwich",
@@ -508,7 +495,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 db, recipeId, "Bread", 2, "pieces"
         );
 
-
         recipeId = addRecipe(
                 db,
                 "Boiled Eggs",
@@ -518,7 +504,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         addRecipeIngredient(
                 db, recipeId, "Eggs", 2, "pieces"
         );
-
 
         recipeId = addRecipe(
                 db,
@@ -533,7 +518,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         addRecipeIngredient(
                 db, recipeId, "Eggs", 2, "pieces"
         );
-
 
         recipeId = addRecipe(
                 db,
@@ -552,7 +536,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         addRecipeIngredient(
                 db, recipeId, "Bread", 2, "pieces"
         );
-
 
         recipeId = addRecipe(
                 db,
