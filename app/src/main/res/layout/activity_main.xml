@@ -4,81 +4,116 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="24dp"
     android:background="@color/background">
 
-    <TextView
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/mainToolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Smart Pantry"
-        android:textSize="30sp"
-        android:textStyle="bold"
-        android:textColor="@color/text_dark"
-        android:gravity="center"
-        android:layout_marginTop="45dp"
-        android:layout_marginBottom="6dp" />
+        android:layout_height="80dp"
+        android:paddingTop="24dp"
+        android:background="@color/dark_green"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
 
-    <TextView
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Keep track of what you have at home"
-        android:textSize="16sp"
-        android:textColor="@color/text_grey"
-        android:gravity="center"
-        android:layout_marginBottom="35dp" />
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
-    <Button
-        android:id="@+id/btnViewPantry"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:text="View Pantry"
-        android:textSize="16sp"
-        android:textAllCaps="false"
-        android:textColor="@color/white"
-        android:backgroundTint="@color/primary_green"
-        android:layout_marginBottom="12dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
 
-    <Button
-        android:id="@+id/btnAddItem"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:text="Add Pantry Item"
-        android:textSize="16sp"
-        android:textAllCaps="false"
-        android:textColor="@color/white"
-        android:backgroundTint="@color/primary_green"
-        android:layout_marginBottom="12dp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Smart Pantry Manager"
+                android:textSize="30sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_dark"
+                android:gravity="center"
+                android:layout_marginTop="30dp"
+                android:layout_marginBottom="8dp" />
 
-    <Button
-        android:id="@+id/btnShoppingList"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:text="Shopping List"
-        android:textSize="16sp"
-        android:textAllCaps="false"
-        android:textColor="@color/white"
-        android:backgroundTint="@color/dark_green"
-        android:layout_marginBottom="12dp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Manage your pantry and make the most of what you have"
+                android:textSize="15sp"
+                android:textColor="@color/text_grey"
+                android:gravity="center"
+                android:layout_marginBottom="35dp" />
 
-    <Button
-        android:id="@+id/btnExpiry"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:text="Expiry Tracker"
-        android:textSize="16sp"
-        android:textAllCaps="false"
-        android:textColor="@color/white"
-        android:backgroundTint="@color/dark_green"
-        android:layout_marginBottom="12dp" />
+            <Button
+                android:id="@+id/btnViewPantry"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="View Pantry"
+                android:textSize="16sp"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/primary_green"
+                android:layout_marginBottom="12dp" />
 
-    <Button
-        android:id="@+id/btnRecipes"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:text="Recipes"
-        android:textSize="16sp"
-        android:textAllCaps="false"
-        android:textColor="@color/white"
-        android:backgroundTint="@color/dark_green" />
+            <Button
+                android:id="@+id/btnAddItem"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="Add Pantry Item"
+                android:textSize="16sp"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/primary_green"
+                android:layout_marginBottom="12dp" />
+
+            <Button
+                android:id="@+id/btnShoppingList"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="Shopping List"
+                android:textSize="16sp"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/primary_green"
+                android:layout_marginBottom="12dp" />
+
+            <Button
+                android:id="@+id/btnExpiry"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="Expiry Tracker"
+                android:textSize="16sp"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/primary_green"
+                android:layout_marginBottom="12dp" />
+
+            <Button
+                android:id="@+id/btnRecipes"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="Suggested Recipes"
+                android:textSize="16sp"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/primary_green"
+                android:layout_marginBottom="12dp" />
+
+            <Button
+                android:id="@+id/btnSettings"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="Settings"
+                android:textSize="16sp"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/dark_green"
+                android:layout_marginBottom="30dp" />
+
+        </LinearLayout>
+
+    </ScrollView>
 
 </LinearLayout>

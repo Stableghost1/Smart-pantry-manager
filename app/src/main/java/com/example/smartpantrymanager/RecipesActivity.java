@@ -1,6 +1,7 @@
 package com.example.smartpantrymanager;
 
-import android.content.SharedPreferences;
+import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.Button;
@@ -9,10 +10,13 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.ArrayList;
+
 public class RecipesActivity extends AppCompatActivity {
 
     private LinearLayout recipesContainer;
-    private String pantryItems;
+    private DatabaseHelper databaseHelper;
+    private ArrayList<PantryItem> pantryItems;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,64 +24,296 @@ public class RecipesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_recipes);
 
         recipesContainer = findViewById(R.id.recipesContainer);
+        databaseHelper = new DatabaseHelper(this);
 
         Button backButton = findViewById(R.id.buttonBack);
+
         backButton.setOnClickListener(v -> finish());
-
-        SharedPreferences preferences =
-                getSharedPreferences("PantryData", MODE_PRIVATE);
-
-        pantryItems = preferences.getString("pantryItems", "").toLowerCase();
-
-        showRecipes();
     }
 
-    private void showRecipes() {
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        loadPantryItems();
+        showSuggestedRecipes();
+    }
+
+    private void loadPantryItems() {
+
+        pantryItems = new ArrayList<>();
+
+        Cursor cursor = databaseHelper.getAllPantryItems();
+
+        while (cursor.moveToNext()) {
+
+            int id = cursor.getInt(
+                    cursor.getColumnIndexOrThrow(
+                            DatabaseHelper.COLUMN_ID
+                    )
+            );
+
+            String name = cursor.getString(
+                    cursor.getColumnIndexOrThrow(
+                            DatabaseHelper.COLUMN_NAME
+                    )
+            );
+
+            int quantity = cursor.getInt(
+                    cursor.getColumnIndexOrThrow(
+                            DatabaseHelper.COLUMN_QUANTITY
+                    )
+            );
+
+            String unit = cursor.getString(
+                    cursor.getColumnIndexOrThrow(
+                            DatabaseHelper.COLUMN_UNIT
+                    )
+            );
+
+            String category = cursor.getString(
+                    cursor.getColumnIndexOrThrow(
+                            DatabaseHelper.COLUMN_CATEGORY
+                    )
+            );
+
+            String expiry = cursor.getString(
+                    cursor.getColumnIndexOrThrow(
+                            DatabaseHelper.COLUMN_EXPIRY
+                    )
+            );
+
+            PantryItem item = new PantryItem(
+                    id,
+                    name,
+                    quantity,
+                    unit,
+                    category,
+                    expiry
+            );
+
+            pantryItems.add(item);
+        }
+
+        cursor.close();
+    }
+
+    private void showSuggestedRecipes() {
+
         recipesContainer.removeAllViews();
 
-        addRecipe(
-                "Cheese Omelette",
-                "Eggs, Cheese",
-                "Beat the eggs, add grated cheese and cook in a frying pan.",
-                new String[]{"eggs", "cheese"}
-        );
+        Cursor recipeCursor =
+                databaseHelper.getAllRecipes();
 
-        addRecipe(
-                "Chicken and Rice",
-                "Chicken, Rice",
-                "Cook the chicken and serve with cooked rice.",
-                new String[]{"chicken", "rice"}
-        );
+        int matches = 0;
 
-        addRecipe(
-                "Cheese Toast",
-                "Bread, Cheese",
-                "Add cheese to bread and toast until the cheese has melted.",
-                new String[]{"bread", "cheese"}
-        );
+        while (recipeCursor.moveToNext()) {
 
-        addRecipe(
-                "Egg Fried Rice",
-                "Eggs, Rice",
-                "Cook the rice, add beaten eggs and fry together in a pan.",
-                new String[]{"eggs", "rice"}
-        );
+            int recipeId = recipeCursor.getInt(
+                    recipeCursor.getColumnIndexOrThrow(
+                            DatabaseHelper.RECIPE_ID
+                    )
+            );
 
-        addRecipe(
-                "Chicken Sandwich",
-                "Chicken, Bread",
-                "Cook the chicken, slice it and serve between two slices of bread.",
-                new String[]{"chicken", "bread"}
-        );
+            String recipeName = recipeCursor.getString(
+                    recipeCursor.getColumnIndexOrThrow(
+                            DatabaseHelper.RECIPE_NAME
+                    )
+            );
+
+            String method = recipeCursor.getString(
+                    recipeCursor.getColumnIndexOrThrow(
+                            DatabaseHelper.RECIPE_METHOD
+                    )
+            );
+
+            Recipe recipe = new Recipe(
+                    recipeId,
+                    recipeName,
+                    method
+            );
+
+            if (canMakeRecipe(recipe.getId())) {
+
+                displayRecipe(recipe);
+                matches++;
+            }
+        }
+
+        recipeCursor.close();
+
+        if (matches == 0) {
+            showNoRecipesMessage();
+        }
     }
 
-    private void addRecipe(String name, String ingredients,
-                           String instructions, String[] requiredItems) {
+    private boolean canMakeRecipe(int recipeId) {
+
+        Cursor ingredientCursor =
+                databaseHelper.getRecipeIngredients(recipeId);
+
+        boolean canMake = true;
+
+        while (ingredientCursor.moveToNext()) {
+
+            String ingredientName =
+                    ingredientCursor.getString(
+                            ingredientCursor.getColumnIndexOrThrow(
+                                    DatabaseHelper.INGREDIENT_NAME
+                            )
+                    );
+
+            int requiredQuantity =
+                    ingredientCursor.getInt(
+                            ingredientCursor.getColumnIndexOrThrow(
+                                    DatabaseHelper.INGREDIENT_QUANTITY
+                            )
+                    );
+
+            String requiredUnit =
+                    ingredientCursor.getString(
+                            ingredientCursor.getColumnIndexOrThrow(
+                                    DatabaseHelper.INGREDIENT_UNIT
+                            )
+                    );
+
+            if (!hasEnoughIngredient(
+                    ingredientName,
+                    requiredQuantity,
+                    requiredUnit)) {
+
+                canMake = false;
+                break;
+            }
+        }
+
+        ingredientCursor.close();
+
+        return canMake;
+    }
+
+    private boolean hasEnoughIngredient(
+            String requiredName,
+            int requiredQuantity,
+            String requiredUnit) {
+
+        String cleanRequiredName =
+                cleanIngredientName(requiredName);
+
+        double totalAvailable = 0;
+
+        String requiredType =
+                getUnitType(requiredUnit);
+
+        for (PantryItem item : pantryItems) {
+
+            String pantryName =
+                    cleanIngredientName(
+                            item.getName()
+                    );
+
+            if (pantryName.equals(cleanRequiredName)) {
+
+                String pantryType =
+                        getUnitType(item.getUnit());
+
+                if (!pantryType.equals(requiredType)) {
+                    continue;
+                }
+
+                totalAvailable += convertQuantity(
+                        item.getQuantity(),
+                        item.getUnit()
+                );
+            }
+        }
+
+        double requiredAmount =
+                convertQuantity(
+                        requiredQuantity,
+                        requiredUnit
+                );
+
+        return totalAvailable >= requiredAmount;
+    }
+
+    private double convertQuantity(
+            int quantity,
+            String unit) {
+
+        String cleanUnit =
+                unit.trim().toLowerCase();
+
+        if (cleanUnit.equals("kg")) {
+            return quantity * 1000.0;
+        }
+
+        if (cleanUnit.equals("l")) {
+            return quantity * 1000.0;
+        }
+
+        return quantity;
+    }
+
+    private String getUnitType(String unit) {
+
+        String cleanUnit =
+                unit.trim().toLowerCase();
+
+        if (cleanUnit.equals("g")
+                || cleanUnit.equals("kg")) {
+
+            return "weight";
+        }
+
+        if (cleanUnit.equals("ml")
+                || cleanUnit.equals("l")) {
+
+            return "volume";
+        }
+
+        return "pieces";
+    }
+
+    private String cleanIngredientName(String name) {
+
+        String cleanName =
+                name.trim().toLowerCase();
+
+        if (cleanName.equals("eggs")) {
+            return "egg";
+        }
+
+        if (cleanName.equals("tomatoes")) {
+            return "tomato";
+        }
+
+        if (cleanName.equals("potatoes")) {
+            return "potato";
+        }
+
+        if (cleanName.endsWith("s")
+                && !cleanName.equals("cheese")
+                && !cleanName.equals("rice")) {
+
+            cleanName = cleanName.substring(
+                    0,
+                    cleanName.length() - 1
+            );
+        }
+
+        return cleanName;
+    }
+
+    private void displayRecipe(Recipe recipe) {
 
         LinearLayout card = new LinearLayout(this);
+
         card.setOrientation(LinearLayout.VERTICAL);
         card.setPadding(30, 25, 30, 25);
         card.setBackgroundColor(Color.WHITE);
+        card.setClickable(true);
+        card.setFocusable(true);
 
         LinearLayout.LayoutParams cardParams =
                 new LinearLayout.LayoutParams(
@@ -85,63 +321,116 @@ public class RecipesActivity extends AppCompatActivity {
                         LinearLayout.LayoutParams.WRAP_CONTENT
                 );
 
-        cardParams.setMargins(0, 0, 0, 20);
+        cardParams.setMargins(
+                0,
+                0,
+                0,
+                20
+        );
+
         card.setLayoutParams(cardParams);
 
         TextView nameText = new TextView(this);
-        nameText.setText(name);
+
+        nameText.setText(recipe.getName());
         nameText.setTextSize(19);
+
         nameText.setTextColor(
-                getResources().getColor(R.color.text_dark)
-        );
-
-        TextView ingredientsText = new TextView(this);
-        ingredientsText.setText("Ingredients: " + ingredients);
-        ingredientsText.setTextSize(15);
-        ingredientsText.setTextColor(
-                getResources().getColor(R.color.text_grey)
-        );
-        ingredientsText.setPadding(0, 10, 0, 8);
-
-        TextView instructionsText = new TextView(this);
-        instructionsText.setText(instructions);
-        instructionsText.setTextSize(15);
-        instructionsText.setTextColor(
-                getResources().getColor(R.color.text_dark)
+                getResources().getColor(
+                        R.color.text_dark
+                )
         );
 
         TextView availableText = new TextView(this);
-        availableText.setTextSize(14);
-        availableText.setPadding(0, 12, 0, 0);
 
-        if (hasIngredients(requiredItems)) {
-            availableText.setText("You have the ingredients");
-            availableText.setTextColor(
-                    getResources().getColor(R.color.expiry_safe)
-            );
-        } else {
-            availableText.setText("Some ingredients are missing");
-            availableText.setTextColor(
-                    getResources().getColor(R.color.expiry_warning)
-            );
-        }
+        availableText.setText(
+                "You have all the required ingredients"
+        );
+
+        availableText.setTextSize(14);
+
+        availableText.setTextColor(
+                getResources().getColor(
+                        R.color.expiry_safe
+                )
+        );
+
+        availableText.setPadding(
+                0,
+                10,
+                0,
+                5
+        );
+
+        TextView viewText = new TextView(this);
+
+        viewText.setText(
+                "Tap to view recipe"
+        );
+
+        viewText.setTextSize(13);
+
+        viewText.setTextColor(
+                getResources().getColor(
+                        R.color.primary_green
+                )
+        );
 
         card.addView(nameText);
-        card.addView(ingredientsText);
-        card.addView(instructionsText);
         card.addView(availableText);
+        card.addView(viewText);
+
+        card.setOnClickListener(v -> {
+
+            Intent intent = new Intent(
+                    RecipesActivity.this,
+                    RecipeDetailActivity.class
+            );
+
+            intent.putExtra(
+                    "recipeId",
+                    recipe.getId()
+            );
+
+            intent.putExtra(
+                    "recipeName",
+                    recipe.getName()
+            );
+
+            intent.putExtra(
+                    "recipeMethod",
+                    recipe.getMethod()
+            );
+
+            startActivity(intent);
+        });
 
         recipesContainer.addView(card);
     }
 
-    private boolean hasIngredients(String[] requiredItems) {
+    private void showNoRecipesMessage() {
 
-        for (String item : requiredItems) {
-            if (!pantryItems.contains(item.toLowerCase())) {
-                return false;
-            }
-        }
+        TextView message = new TextView(this);
 
-        return true;
+        message.setText(
+                "No recipes match your pantry yet - add more ingredients"
+        );
+
+        message.setTextSize(17);
+
+        message.setTextColor(
+                getResources().getColor(
+                        R.color.text_grey
+                )
+        );
+
+        message.setPadding(
+                20,
+                40,
+                20,
+                40
+        );
+
+        recipesContainer.addView(message);
     }
 }

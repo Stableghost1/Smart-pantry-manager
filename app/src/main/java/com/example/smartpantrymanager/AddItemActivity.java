@@ -1,6 +1,5 @@
 package com.example.smartpantrymanager;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,11 +15,14 @@ public class AddItemActivity extends AppCompatActivity {
 
     private EditText editItemName;
     private EditText editQuantity;
+    private EditText editUnit;
     private EditText editCategory;
     private EditText editExpiryDate;
 
+    private DatabaseHelper databaseHelper;
+
     private boolean editMode = false;
-    private int itemPosition = -1;
+    private int itemId = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,17 +31,26 @@ public class AddItemActivity extends AppCompatActivity {
 
         editItemName = findViewById(R.id.editItemName);
         editQuantity = findViewById(R.id.editQuantity);
+        editUnit = findViewById(R.id.editUnit);
         editCategory = findViewById(R.id.editCategory);
         editExpiryDate = findViewById(R.id.editExpiryDate);
 
         Button saveButton = findViewById(R.id.buttonSaveItem);
         Button cancelButton = findViewById(R.id.buttonCancel);
 
-        editMode = getIntent().getBooleanExtra("editMode", false);
+        databaseHelper = new DatabaseHelper(this);
+
+        editMode = getIntent().getBooleanExtra(
+                "editMode",
+                false
+        );
 
         if (editMode) {
 
-            itemPosition = getIntent().getIntExtra("itemPosition", -1);
+            itemId = getIntent().getIntExtra(
+                    "itemId",
+                    -1
+            );
 
             editItemName.setText(
                     getIntent().getStringExtra("itemName")
@@ -47,6 +58,10 @@ public class AddItemActivity extends AppCompatActivity {
 
             editQuantity.setText(
                     getIntent().getStringExtra("quantity")
+            );
+
+            editUnit.setText(
+                    getIntent().getStringExtra("unit")
             );
 
             editCategory.setText(
@@ -61,108 +76,195 @@ public class AddItemActivity extends AppCompatActivity {
         }
 
         saveButton.setOnClickListener(v -> saveItem());
+
         cancelButton.setOnClickListener(v -> finish());
     }
 
     private void saveItem() {
 
-        String name = editItemName.getText().toString().trim();
-        String quantity = editQuantity.getText().toString().trim();
-        String category = editCategory.getText().toString().trim();
-        String expiryDate = editExpiryDate.getText().toString().trim();
+        String name =
+                editItemName.getText().toString().trim();
+
+        String quantityText =
+                editQuantity.getText().toString().trim();
+
+        String unit =
+                editUnit.getText().toString().trim().toLowerCase();
+
+        String category =
+                editCategory.getText().toString().trim();
+
+        String expiryDate =
+                editExpiryDate.getText().toString().trim();
 
         if (name.isEmpty()) {
-            editItemName.setError("Enter an item name");
+
+            editItemName.setError(
+                    "Enter an item name"
+            );
+
             editItemName.requestFocus();
             return;
         }
 
-        if (quantity.isEmpty()) {
-            editQuantity.setError("Enter a quantity");
+        if (quantityText.isEmpty()) {
+
+            editQuantity.setError(
+                    "Enter a quantity"
+            );
+
             editQuantity.requestFocus();
             return;
         }
 
+        int quantity;
+
+        try {
+
+            quantity = Integer.parseInt(
+                    quantityText
+            );
+
+        } catch (NumberFormatException e) {
+
+            editQuantity.setError(
+                    "Enter a valid quantity"
+            );
+
+            editQuantity.requestFocus();
+            return;
+        }
+
+        if (quantity <= 0) {
+
+            editQuantity.setError(
+                    "Quantity must be more than 0"
+            );
+
+            editQuantity.requestFocus();
+            return;
+        }
+
+        if (unit.isEmpty()) {
+
+            editUnit.setError(
+                    "Enter a unit"
+            );
+
+            editUnit.requestFocus();
+            return;
+        }
+
+        if (!validUnit(unit)) {
+
+            editUnit.setError(
+                    "Use pieces, g, kg, ml or l"
+            );
+
+            editUnit.requestFocus();
+            return;
+        }
+
         if (category.isEmpty()) {
-            editCategory.setError("Enter a category");
+
+            editCategory.setError(
+                    "Enter a category"
+            );
+
             editCategory.requestFocus();
             return;
         }
 
         if (expiryDate.isEmpty()) {
-            editExpiryDate.setError("Enter an expiry date");
+
+            editExpiryDate.setError(
+                    "Enter an expiry date"
+            );
+
             editExpiryDate.requestFocus();
             return;
         }
 
         if (!validDate(expiryDate)) {
-            editExpiryDate.setError("Use DD/MM/YYYY");
+
+            editExpiryDate.setError(
+                    "Use DD/MM/YYYY"
+            );
+
             editExpiryDate.requestFocus();
             return;
         }
 
-        String newItem =
-                name + "|" +
-                        quantity + "|" +
-                        category + "|" +
-                        expiryDate;
+        if (editMode && itemId >= 0) {
 
-        SharedPreferences preferences =
-                getSharedPreferences("PantryData", MODE_PRIVATE);
+            int result =
+                    databaseHelper.updatePantryItem(
+                            itemId,
+                            name,
+                            quantity,
+                            unit,
+                            category,
+                            expiryDate
+                    );
 
-        String savedItems =
-                preferences.getString("pantryItems", "");
-
-        if (editMode && itemPosition >= 0) {
-
-            String[] items = savedItems.split("\n");
-
-            if (itemPosition < items.length) {
-
-                items[itemPosition] = newItem;
-
-                StringBuilder updatedItems = new StringBuilder();
-
-                for (String item : items) {
-
-                    if (updatedItems.length() > 0) {
-                        updatedItems.append("\n");
-                    }
-
-                    updatedItems.append(item);
-                }
-
-                preferences.edit()
-                        .putString("pantryItems", updatedItems.toString())
-                        .apply();
+            if (result > 0) {
 
                 Toast.makeText(
                         this,
                         "Item updated",
                         Toast.LENGTH_SHORT
                 ).show();
+
+                finish();
+
+            } else {
+
+                Toast.makeText(
+                        this,
+                        "Item could not be updated",
+                        Toast.LENGTH_SHORT
+                ).show();
             }
 
         } else {
 
-            if (!savedItems.isEmpty()) {
-                savedItems += "\n";
+            long result =
+                    databaseHelper.addPantryItem(
+                            name,
+                            quantity,
+                            unit,
+                            category,
+                            expiryDate
+                    );
+
+            if (result != -1) {
+
+                Toast.makeText(
+                        this,
+                        "Item saved",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                finish();
+
+            } else {
+
+                Toast.makeText(
+                        this,
+                        "Item could not be saved",
+                        Toast.LENGTH_SHORT
+                ).show();
             }
-
-            savedItems += newItem;
-
-            preferences.edit()
-                    .putString("pantryItems", savedItems)
-                    .apply();
-
-            Toast.makeText(
-                    this,
-                    "Item saved",
-                    Toast.LENGTH_SHORT
-            ).show();
         }
+    }
 
-        finish();
+    private boolean validUnit(String unit) {
+
+        return unit.equals("pieces")
+                || unit.equals("g")
+                || unit.equals("kg")
+                || unit.equals("ml")
+                || unit.equals("l");
     }
 
     private boolean validDate(String date) {
@@ -176,10 +278,12 @@ public class AddItemActivity extends AppCompatActivity {
         format.setLenient(false);
 
         try {
+
             format.parse(date);
             return true;
 
         } catch (ParseException e) {
+
             return false;
         }
     }

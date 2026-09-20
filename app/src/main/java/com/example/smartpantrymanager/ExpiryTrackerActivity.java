@@ -1,6 +1,7 @@
 package com.example.smartpantrymanager;
 
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.Button;
@@ -18,113 +19,297 @@ import java.util.concurrent.TimeUnit;
 public class ExpiryTrackerActivity extends AppCompatActivity {
 
     private LinearLayout expiryItemsContainer;
+    private DatabaseHelper databaseHelper;
+    private SharedPreferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_expiry_tracker);
 
-        expiryItemsContainer = findViewById(R.id.expiryItemsContainer);
+        expiryItemsContainer =
+                findViewById(R.id.expiryItemsContainer);
 
-        Button backButton = findViewById(R.id.buttonBack);
+        Button backButton =
+                findViewById(R.id.buttonBack);
+
+        databaseHelper =
+                new DatabaseHelper(this);
+
+        preferences = getSharedPreferences(
+                "AppSettings",
+                MODE_PRIVATE
+        );
+
         backButton.setOnClickListener(v -> finish());
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        displayExpiryItems();
+        loadExpiryItems();
     }
 
-    private void displayExpiryItems() {
+    private void loadExpiryItems() {
 
         expiryItemsContainer.removeAllViews();
 
-        SharedPreferences preferences =
-                getSharedPreferences("PantryData", MODE_PRIVATE);
+        boolean remindersEnabled =
+                preferences.getBoolean(
+                        "expiryReminders",
+                        true
+                );
 
-        String savedItems =
-                preferences.getString("pantryItems", "");
-
-        if (savedItems.isEmpty()) {
-            showEmptyMessage();
+        if (!remindersEnabled) {
+            showMessage(
+                    "Expiry reminders are turned off in Settings."
+            );
             return;
         }
 
-        String[] items = savedItems.split("\n");
+        Cursor cursor =
+                databaseHelper.getAllPantryItems();
 
-        for (String item : items) {
+        if (cursor.getCount() == 0) {
+            cursor.close();
 
-            String[] details = item.split("\\|");
+            showMessage(
+                    "No pantry items available."
+            );
 
-            if (details.length == 4) {
+            return;
+        }
 
-                String name = details[0];
-                String quantity = details[1];
-                String expiryDate = details[3];
+        while (cursor.moveToNext()) {
 
-                String status = getExpiryStatus(expiryDate);
+            String name = cursor.getString(
+                    cursor.getColumnIndexOrThrow(
+                            DatabaseHelper.COLUMN_NAME
+                    )
+            );
 
-                LinearLayout card = new LinearLayout(this);
-                card.setOrientation(LinearLayout.VERTICAL);
-                card.setPadding(30, 25, 30, 25);
-                card.setBackgroundColor(Color.WHITE);
+            int quantity = cursor.getInt(
+                    cursor.getColumnIndexOrThrow(
+                            DatabaseHelper.COLUMN_QUANTITY
+                    )
+            );
 
-                LinearLayout.LayoutParams cardParams =
-                        new LinearLayout.LayoutParams(
-                                LinearLayout.LayoutParams.MATCH_PARENT,
-                                LinearLayout.LayoutParams.WRAP_CONTENT
-                        );
+            String unit = cursor.getString(
+                    cursor.getColumnIndexOrThrow(
+                            DatabaseHelper.COLUMN_UNIT
+                    )
+            );
 
-                cardParams.setMargins(0, 0, 0, 20);
-                card.setLayoutParams(cardParams);
+            String expiry = cursor.getString(
+                    cursor.getColumnIndexOrThrow(
+                            DatabaseHelper.COLUMN_EXPIRY
+                    )
+            );
 
-                TextView itemText = new TextView(this);
-                itemText.setText(
-                        name +
-                                "\nQuantity: " + quantity +
-                                "\nExpiry: " + expiryDate
+            displayExpiryItem(
+                    name,
+                    quantity,
+                    unit,
+                    expiry
+            );
+        }
+
+        cursor.close();
+    }
+
+    private void displayExpiryItem(
+            String name,
+            int quantity,
+            String unit,
+            String expiry) {
+
+        LinearLayout card =
+                new LinearLayout(this);
+
+        card.setOrientation(
+                LinearLayout.VERTICAL
+        );
+
+        card.setPadding(
+                30,
+                25,
+                30,
+                25
+        );
+
+        card.setBackgroundColor(Color.WHITE);
+
+        LinearLayout.LayoutParams cardParams =
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
                 );
 
-                itemText.setTextSize(17);
-                itemText.setTextColor(
-                        getResources().getColor(R.color.text_dark)
-                );
+        cardParams.setMargins(
+                0,
+                0,
+                0,
+                20
+        );
 
-                TextView statusText = new TextView(this);
-                statusText.setText(status);
-                statusText.setTextSize(15);
-                statusText.setPadding(0, 15, 0, 0);
+        card.setLayoutParams(cardParams);
 
-                if (status.equals("Expired")) {
+        TextView nameText =
+                new TextView(this);
 
-                    statusText.setTextColor(
-                            getResources().getColor(R.color.delete_red)
-                    );
+        nameText.setText(name);
 
-                } else if (status.equals("Expires today")
-                        || status.startsWith("Expiring soon")) {
+        nameText.setTextSize(19);
 
-                    statusText.setTextColor(
-                            getResources().getColor(R.color.expiry_warning)
-                    );
+        nameText.setTextColor(
+                getResources().getColor(
+                        R.color.text_dark
+                )
+        );
 
-                } else {
 
-                    statusText.setTextColor(
-                            getResources().getColor(R.color.expiry_safe)
-                    );
-                }
+        TextView quantityText =
+                new TextView(this);
 
-                card.addView(itemText);
-                card.addView(statusText);
+        quantityText.setText(
+                "Quantity: " +
+                        quantity +
+                        " " +
+                        unit
+        );
 
-                expiryItemsContainer.addView(card);
-            }
+        quantityText.setTextSize(14);
+
+        quantityText.setTextColor(
+                getResources().getColor(
+                        R.color.text_grey
+                )
+        );
+
+        quantityText.setPadding(
+                0,
+                8,
+                0,
+                5
+        );
+
+
+        TextView expiryText =
+                new TextView(this);
+
+        expiryText.setText(
+                "Expiry: " + expiry
+        );
+
+        expiryText.setTextSize(14);
+
+        expiryText.setTextColor(
+                getResources().getColor(
+                        R.color.text_grey
+                )
+        );
+
+
+        TextView statusText =
+                new TextView(this);
+
+        statusText.setText(
+                getExpiryStatus(expiry)
+        );
+
+        statusText.setTextSize(15);
+
+        statusText.setPadding(
+                0,
+                8,
+                0,
+                0
+        );
+
+        setStatusColour(
+                statusText,
+                expiry
+        );
+
+
+        card.addView(nameText);
+        card.addView(quantityText);
+        card.addView(expiryText);
+        card.addView(statusText);
+
+        expiryItemsContainer.addView(card);
+    }
+
+    private String getExpiryStatus(String expiry) {
+
+        long days =
+                getDaysUntilExpiry(expiry);
+
+        if (days == Long.MIN_VALUE) {
+            return "Invalid expiry date";
+        }
+
+        if (days < 0) {
+            return "Expired";
+        }
+
+        if (days == 0) {
+            return "Expires today";
+        }
+
+        if (days <= 7) {
+            return "Expires in " +
+                    days +
+                    " day" +
+                    (days == 1 ? "" : "s");
+        }
+
+        return "Safe";
+    }
+
+    private void setStatusColour(
+            TextView statusText,
+            String expiry) {
+
+        long days =
+                getDaysUntilExpiry(expiry);
+
+        if (days == Long.MIN_VALUE) {
+
+            statusText.setTextColor(
+                    getResources().getColor(
+                            R.color.text_grey
+                    )
+            );
+
+        } else if (days < 0) {
+
+            statusText.setTextColor(
+                    getResources().getColor(
+                            R.color.delete_red
+                    )
+            );
+
+        } else if (days <= 7) {
+
+            statusText.setTextColor(
+                    getResources().getColor(
+                            R.color.expiry_warning
+                    )
+            );
+
+        } else {
+
+            statusText.setTextColor(
+                    getResources().getColor(
+                            R.color.expiry_safe
+                    )
+            );
         }
     }
 
-    private String getExpiryStatus(String expiryDate) {
+    private long getDaysUntilExpiry(
+            String expiry) {
 
         SimpleDateFormat format =
                 new SimpleDateFormat(
@@ -136,52 +321,57 @@ public class ExpiryTrackerActivity extends AppCompatActivity {
 
         try {
 
-            Date expiry = format.parse(expiryDate);
-            Date today = format.parse(
-                    format.format(new Date())
-            );
+            Date expiryDate =
+                    format.parse(expiry);
 
-            if (expiry == null || today == null) {
-                return "Invalid date";
+            String todayText =
+                    format.format(new Date());
+
+            Date today =
+                    format.parse(todayText);
+
+            if (expiryDate == null ||
+                    today == null) {
+
+                return Long.MIN_VALUE;
             }
 
             long difference =
-                    expiry.getTime() - today.getTime();
+                    expiryDate.getTime() -
+                            today.getTime();
 
-            long days =
-                    TimeUnit.MILLISECONDS.toDays(difference);
-
-            if (days < 0) {
-                return "Expired";
-            }
-
-            if (days == 0) {
-                return "Expires today";
-            }
-
-            if (days <= 7) {
-                return "Expiring soon - " + days + " days left";
-            }
-
-            return days + " days left";
+            return TimeUnit.MILLISECONDS
+                    .toDays(difference);
 
         } catch (ParseException e) {
 
-            return "Invalid date";
+            return Long.MIN_VALUE;
         }
     }
 
-    private void showEmptyMessage() {
+    private void showMessage(
+            String messageText) {
 
-        TextView emptyMessage = new TextView(this);
+        TextView message =
+                new TextView(this);
 
-        emptyMessage.setText("No items to track");
-        emptyMessage.setTextSize(17);
-        emptyMessage.setTextColor(
-                getResources().getColor(R.color.text_grey)
+        message.setText(messageText);
+
+        message.setTextSize(17);
+
+        message.setTextColor(
+                getResources().getColor(
+                        R.color.text_grey
+                )
         );
-        emptyMessage.setPadding(20, 30, 20, 30);
 
-        expiryItemsContainer.addView(emptyMessage);
+        message.setPadding(
+                20,
+                40,
+                20,
+                40
+        );
+
+        expiryItemsContainer.addView(message);
     }
 }
