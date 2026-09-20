@@ -40,37 +40,25 @@ public class AddItemActivity extends AppCompatActivity {
 
         databaseHelper = new DatabaseHelper(this);
 
-        editMode = getIntent().getBooleanExtra(
-                "editMode",
-                false
-        );
+        editMode = getIntent().getBooleanExtra("editMode", false);
 
         if (editMode) {
-
-            itemId = getIntent().getIntExtra(
-                    "itemId",
-                    -1
-            );
+            itemId = getIntent().getIntExtra("itemId", -1);
 
             editItemName.setText(
-                    getIntent().getStringExtra("itemName")
-            );
+                    getIntent().getStringExtra("itemName"));
 
             editQuantity.setText(
-                    getIntent().getStringExtra("quantity")
-            );
+                    getIntent().getStringExtra("quantity"));
 
             editUnit.setText(
-                    getIntent().getStringExtra("unit")
-            );
+                    getIntent().getStringExtra("unit"));
 
             editCategory.setText(
-                    getIntent().getStringExtra("category")
-            );
+                    getIntent().getStringExtra("category"));
 
             editExpiryDate.setText(
-                    getIntent().getStringExtra("expiryDate")
-            );
+                    getIntent().getStringExtra("expiryDate"));
 
             saveButton.setText("Update Item");
         }
@@ -98,21 +86,13 @@ public class AddItemActivity extends AppCompatActivity {
                 editExpiryDate.getText().toString().trim();
 
         if (name.isEmpty()) {
-
-            editItemName.setError(
-                    "Enter an item name"
-            );
-
+            editItemName.setError("Enter an item name");
             editItemName.requestFocus();
             return;
         }
 
         if (quantityText.isEmpty()) {
-
-            editQuantity.setError(
-                    "Enter a quantity"
-            );
-
+            editQuantity.setError("Enter a quantity");
             editQuantity.requestFocus();
             return;
         }
@@ -120,76 +100,44 @@ public class AddItemActivity extends AppCompatActivity {
         int quantity;
 
         try {
-
-            quantity = Integer.parseInt(
-                    quantityText
-            );
-
+            quantity = Integer.parseInt(quantityText);
         } catch (NumberFormatException e) {
-
-            editQuantity.setError(
-                    "Enter a valid quantity"
-            );
-
+            editQuantity.setError("Enter a valid quantity");
             editQuantity.requestFocus();
             return;
         }
 
         if (quantity <= 0) {
-
             editQuantity.setError(
-                    "Quantity must be more than 0"
-            );
-
+                    "Quantity must be more than 0");
             editQuantity.requestFocus();
             return;
         }
 
         if (unit.isEmpty()) {
-
-            editUnit.setError(
-                    "Enter a unit"
-            );
-
+            editUnit.setError("Enter a unit");
             editUnit.requestFocus();
             return;
         }
 
         if (!validUnit(unit)) {
-
             editUnit.setError(
-                    "Use pieces, g, kg, ml or l"
-            );
-
+                    "Use pieces, g, kg, ml or l");
             editUnit.requestFocus();
             return;
         }
 
         if (category.isEmpty()) {
-
-            editCategory.setError(
-                    "Enter a category"
-            );
-
+            editCategory.setError("Enter a category");
             editCategory.requestFocus();
             return;
         }
 
-        if (expiryDate.isEmpty()) {
+        if (!expiryDate.isEmpty()
+                && !validDate(expiryDate)) {
 
             editExpiryDate.setError(
-                    "Enter an expiry date"
-            );
-
-            editExpiryDate.requestFocus();
-            return;
-        }
-
-        if (!validDate(expiryDate)) {
-
-            editExpiryDate.setError(
-                    "Use DD/MM/YYYY"
-            );
+                    "Use DD/MM/YYYY");
 
             editExpiryDate.requestFocus();
             return;
@@ -278,12 +226,10 @@ public class AddItemActivity extends AppCompatActivity {
         format.setLenient(false);
 
         try {
-
             format.parse(date);
             return true;
 
         } catch (ParseException e) {
-
             return false;
         }
     }

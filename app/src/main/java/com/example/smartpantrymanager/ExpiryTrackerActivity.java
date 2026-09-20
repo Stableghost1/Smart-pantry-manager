@@ -71,6 +71,7 @@ public class ExpiryTrackerActivity extends AppCompatActivity {
                 databaseHelper.getAllPantryItems();
 
         if (cursor.getCount() == 0) {
+
             cursor.close();
 
             showMessage(
@@ -154,11 +155,11 @@ public class ExpiryTrackerActivity extends AppCompatActivity {
 
         card.setLayoutParams(cardParams);
 
+
         TextView nameText =
                 new TextView(this);
 
         nameText.setText(name);
-
         nameText.setTextSize(19);
 
         nameText.setTextColor(
@@ -197,9 +198,19 @@ public class ExpiryTrackerActivity extends AppCompatActivity {
         TextView expiryText =
                 new TextView(this);
 
-        expiryText.setText(
-                "Expiry: " + expiry
-        );
+        if (expiry == null ||
+                expiry.trim().isEmpty()) {
+
+            expiryText.setText(
+                    "Expiry: Not set"
+            );
+
+        } else {
+
+            expiryText.setText(
+                    "Expiry: " + expiry
+            );
+        }
 
         expiryText.setTextSize(14);
 
@@ -240,7 +251,14 @@ public class ExpiryTrackerActivity extends AppCompatActivity {
         expiryItemsContainer.addView(card);
     }
 
-    private String getExpiryStatus(String expiry) {
+    private String getExpiryStatus(
+            String expiry) {
+
+        if (expiry == null ||
+                expiry.trim().isEmpty()) {
+
+            return "No expiry date";
+        }
 
         long days =
                 getDaysUntilExpiry(expiry);
@@ -258,6 +276,7 @@ public class ExpiryTrackerActivity extends AppCompatActivity {
         }
 
         if (days <= 7) {
+
             return "Expires in " +
                     days +
                     " day" +
@@ -270,6 +289,18 @@ public class ExpiryTrackerActivity extends AppCompatActivity {
     private void setStatusColour(
             TextView statusText,
             String expiry) {
+
+        if (expiry == null ||
+                expiry.trim().isEmpty()) {
+
+            statusText.setTextColor(
+                    getResources().getColor(
+                            R.color.text_grey
+                    )
+            );
+
+            return;
+        }
 
         long days =
                 getDaysUntilExpiry(expiry);
@@ -356,7 +387,6 @@ public class ExpiryTrackerActivity extends AppCompatActivity {
                 new TextView(this);
 
         message.setText(messageText);
-
         message.setTextSize(17);
 
         message.setTextColor(
