@@ -27,12 +27,29 @@
         android:gravity="center"
         android:layout_marginBottom="18dp" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/pantryRecyclerView"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:scrollbars="vertical" />
+        android:layout_weight="1">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/pantryRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical" />
+
+        <TextView
+            android:id="@+id/textEmptyPantry"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Your pantry is empty&#10;Add an item to get started"
+            android:textSize="17sp"
+            android:textColor="@color/text_grey"
+            android:gravity="center"
+            android:visibility="gone" />
+
+    </FrameLayout>
 
     <Button
         android:id="@+id/buttonAddItem"

@@ -3,7 +3,9 @@ package com.example.smartpantrymanager;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,6 +17,7 @@ import java.util.ArrayList;
 public class ViewPantryActivity extends AppCompatActivity {
 
     private RecyclerView pantryRecyclerView;
+    private TextView textEmptyPantry;
     private ArrayList<PantryItem> pantryItems;
     private PantryAdapter pantryAdapter;
     private DatabaseHelper databaseHelper;
@@ -26,6 +29,10 @@ public class ViewPantryActivity extends AppCompatActivity {
 
         pantryRecyclerView = findViewById(
                 R.id.pantryRecyclerView
+        );
+
+        textEmptyPantry = findViewById(
+                R.id.textEmptyPantry
         );
 
         Button addItemButton = findViewById(
@@ -211,5 +218,16 @@ public class ViewPantryActivity extends AppCompatActivity {
         cursor.close();
 
         pantryAdapter.notifyDataSetChanged();
+
+        if (pantryItems.isEmpty()) {
+
+            pantryRecyclerView.setVisibility(View.GONE);
+            textEmptyPantry.setVisibility(View.VISIBLE);
+
+        } else {
+
+            pantryRecyclerView.setVisibility(View.VISIBLE);
+            textEmptyPantry.setVisibility(View.GONE);
+        }
     }
 }
