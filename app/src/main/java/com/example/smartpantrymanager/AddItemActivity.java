@@ -120,6 +120,8 @@ public class AddItemActivity extends AppCompatActivity {
             return;
         }
 
+        unit = normaliseUnit(unit);
+
         if (!validUnit(unit)) {
             editUnit.setError(
                     "Use pieces, g, kg, ml or l");
@@ -204,6 +206,41 @@ public class AddItemActivity extends AppCompatActivity {
                 ).show();
             }
         }
+    }
+
+    private String normaliseUnit(String unit) {
+
+        if (unit.equals("piece")
+                || unit.equals("pcs")
+                || unit.equals("pc")) {
+            return "pieces";
+        }
+
+        if (unit.equals("gram")
+                || unit.equals("grams")) {
+            return "g";
+        }
+
+        if (unit.equals("kilogram")
+                || unit.equals("kilograms")) {
+            return "kg";
+        }
+
+        if (unit.equals("millilitre")
+                || unit.equals("millilitres")
+                || unit.equals("milliliter")
+                || unit.equals("milliliters")) {
+            return "ml";
+        }
+
+        if (unit.equals("litre")
+                || unit.equals("litres")
+                || unit.equals("liter")
+                || unit.equals("liters")) {
+            return "l";
+        }
+
+        return unit;
     }
 
     private boolean validUnit(String unit) {
