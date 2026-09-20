@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -105,29 +106,7 @@ public class ViewPantryActivity extends AppCompatActivity {
                     @Override
                     public void onDeleteClick(PantryItem item) {
 
-                        int result =
-                                databaseHelper.deletePantryItem(
-                                        item.getId()
-                                );
-
-                        if (result > 0) {
-
-                            Toast.makeText(
-                                    ViewPantryActivity.this,
-                                    "Item deleted",
-                                    Toast.LENGTH_SHORT
-                            ).show();
-
-                            loadPantryItems();
-
-                        } else {
-
-                            Toast.makeText(
-                                    ViewPantryActivity.this,
-                                    "Item could not be deleted",
-                                    Toast.LENGTH_SHORT
-                            ).show();
-                        }
+                        showDeleteConfirmation(item);
                     }
                 }
         );
@@ -156,6 +135,52 @@ public class ViewPantryActivity extends AppCompatActivity {
         super.onResume();
 
         loadPantryItems();
+    }
+
+    private void showDeleteConfirmation(PantryItem item) {
+
+        new AlertDialog.Builder(this)
+                .setTitle("Delete item?")
+                .setMessage(
+                        "Are you sure you want to delete "
+                                + item.getName() + "?"
+                )
+                .setNegativeButton(
+                        "Cancel",
+                        (dialog, which) -> dialog.dismiss()
+                )
+                .setPositiveButton(
+                        "Delete",
+                        (dialog, which) -> deletePantryItem(item)
+                )
+                .show();
+    }
+
+    private void deletePantryItem(PantryItem item) {
+
+        int result =
+                databaseHelper.deletePantryItem(
+                        item.getId()
+                );
+
+        if (result > 0) {
+
+            Toast.makeText(
+                    this,
+                    "Item deleted",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+            loadPantryItems();
+
+        } else {
+
+            Toast.makeText(
+                    this,
+                    "Item could not be deleted",
+                    Toast.LENGTH_SHORT
+            ).show();
+        }
     }
 
     private void loadPantryItems() {
